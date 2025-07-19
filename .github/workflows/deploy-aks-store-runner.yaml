@@ -21,7 +21,7 @@ jobs:
       - name: Azure CLI Login with Managed Identity
         run: |
           # Login using the managed identity assigned to the VM
-          az login --identity --username 893a4871-96d2-4a32-b6c6-954045688408
+          az login --identity --client-id 893a4871-96d2-4a32-b6c6-954045688408
 
       - name: Create AKS Cluster
         run: |
