@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: aks-blob-pv
+  labels:
+    type: azure-blob
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: azure-blob-storage
+  csi:
+    driver: blob.csi.azure.com
+    readOnly: false
+    volumeHandle: staks5q074gff-aks-persistent-storage
+    volumeAttributes:
+      containerName: aks-persistent-storage
+      protocol: fuse
+    nodePublishSecretRef:
+      name: azure-storage-secret
+      namespace: default
+  mountOptions:
+    - dir_mode=0777
+    - file_mode=0777
+    - uid=1000
+    - gid=1000

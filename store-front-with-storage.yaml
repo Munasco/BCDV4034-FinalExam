@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: store-front-with-storage
+  labels:
+    app: store-front-with-storage
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: store-front-with-storage
+  template:
+    metadata:
+      labels:
+        app: store-front-with-storage
+    spec:
+      containers:
+        - name: store-front
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: persistent-storage
+              mountPath: /usr/share/nginx/html/data
+            - name: persistent-storage
+              mountPath: /var/log/nginx
+      volumes:
+        - name: persistent-storage
+          persistentVolumeClaim:
+            claimName: aks-blob-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: store-front-with-storage-service
+spec:
+  selector:
+    app: store-front-with-storage
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
