@@ -48,3 +48,4 @@ Thumbs.db
 # Logs
 *.log
 aks-store-demo/
+aks-store-ci-cd/
