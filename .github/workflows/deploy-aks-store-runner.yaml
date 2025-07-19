@@ -47,11 +47,14 @@ jobs:
             --name ${{ env.CLUSTER_NAME }} \
             --overwrite-existing
 
-      - name: Deploy AKS Store Demo
+            - name: Deploy AKS Store Demo
         run: |
+          # Create namespace first
+          kubectl create namespace aks-store-demo --dry-run=client -o yaml | kubectl apply -f -
+          
           # Apply the store demo
           kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/aks-store-demo/main/aks-store-quickstart.yaml
-
+          
           # Wait for deployments to be ready
           kubectl wait --for=condition=available --timeout=300s deployment/store-front -n aks-store-demo
           kubectl wait --for=condition=available --timeout=300s deployment/product-service -n aks-store-demo
