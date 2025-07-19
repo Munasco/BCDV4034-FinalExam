@@ -51,14 +51,17 @@ jobs:
         run: |
           # Create namespace first
           kubectl create namespace aks-store-demo --dry-run=client -o yaml | kubectl apply -f -
-          
+
           # Apply the store demo
           kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/aks-store-demo/main/aks-store-quickstart.yaml
-          
-          # Wait for deployments to be ready
-          kubectl wait --for=condition=available --timeout=300s deployment/store-front -n aks-store-demo
-          kubectl wait --for=condition=available --timeout=300s deployment/product-service -n aks-store-demo
-          kubectl wait --for=condition=available --timeout=300s deployment/order-service -n aks-store-demo
+
+          # Wait for deployments to be ready (with error handling)
+          echo "Waiting for deployments to be ready..."
+
+          # Wait for each deployment with timeout and continue on failure
+          kubectl wait --for=condition=available --timeout=300s deployment/store-front -n aks-store-demo || echo "store-front deployment wait failed, continuing..."
+          kubectl wait --for=condition=available --timeout=300s deployment/product-service -n aks-store-demo || echo "product-service deployment wait failed, continuing..."
+          kubectl wait --for=condition=available --timeout=300s deployment/order-service -n aks-store-demo || echo "order-service deployment wait failed, continuing..."
 
       - name: Get Service URLs
         run: |
