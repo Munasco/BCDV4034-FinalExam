@@ -55,25 +55,43 @@ jobs:
           # Apply the store demo
           kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/aks-store-demo/main/aks-store-quickstart.yaml
 
-          # Wait for deployments to be ready (with error handling)
+          # Wait a bit for resources to be created
+          sleep 30
+
+          # Check what was actually deployed
+          echo "=== Checking deployed resources ==="
+          kubectl get all -n aks-store-demo
+
+          # Wait for deployments to be ready (with better error handling)
           echo "Waiting for deployments to be ready..."
 
-          # Wait for each deployment with timeout and continue on failure
-          kubectl wait --for=condition=available --timeout=300s deployment/store-front -n aks-store-demo || echo "store-front deployment wait failed, continuing..."
-          kubectl wait --for=condition=available --timeout=300s deployment/product-service -n aks-store-demo || echo "product-service deployment wait failed, continuing..."
-          kubectl wait --for=condition=available --timeout=300s deployment/order-service -n aks-store-demo || echo "order-service deployment wait failed, continuing..."
+          # Check if deployments exist before waiting
+          if kubectl get deployment store-front -n aks-store-demo 2>/dev/null; then
+            kubectl wait --for=condition=available --timeout=300s deployment/store-front -n aks-store-demo || echo "store-front deployment wait failed, continuing..."
+          else
+            echo "store-front deployment not found"
+          fi
+
+          if kubectl get deployment product-service -n aks-store-demo 2>/dev/null; then
+            kubectl wait --for=condition=available --timeout=300s deployment/product-service -n aks-store-demo || echo "product-service deployment wait failed, continuing..."
+          else
+            echo "product-service deployment not found"
+          fi
+
+          if kubectl get deployment order-service -n aks-store-demo 2>/dev/null; then
+            kubectl wait --for=condition=available --timeout=300s deployment/order-service -n aks-store-demo || echo "order-service deployment wait failed, continuing..."
+          else
+            echo "order-service deployment not found"
+          fi
 
       - name: Get Service URLs
         run: |
           echo "=== AKS Store Demo Deployment Complete ==="
-          echo "Store Front Service:"
-          kubectl get service store-front -n aks-store-demo -o wide
+          echo "=== All Resources in Namespace ==="
+          kubectl get all -n aks-store-demo
           echo ""
-          echo "Product Service:"
-          kubectl get service product-service -n aks-store-demo -o wide
+          echo "=== Services ==="
+          kubectl get services -n aks-store-demo
           echo ""
-          echo "Order Service:"
-          kubectl get service order-service -n aks-store-demo -o wide
-          echo ""
-          echo "=== Pod Status ==="
+          echo "=== Pods ==="
           kubectl get pods -n aks-store-demo
