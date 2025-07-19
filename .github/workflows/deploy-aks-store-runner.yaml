@@ -50,20 +50,24 @@ jobs:
       - name: Deploy AKS Store Demo
         run: |
           # Apply the store demo
-          kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/aks-store-demo/main/aks-store-demo.yaml
+          kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/aks-store-demo/main/aks-store-quickstart.yaml
 
           # Wait for deployments to be ready
-          kubectl wait --for=condition=available --timeout=300s deployment/aks-store-demo-frontend -n aks-store-demo
-          kubectl wait --for=condition=available --timeout=300s deployment/aks-store-demo-backend -n aks-store-demo
+          kubectl wait --for=condition=available --timeout=300s deployment/store-front -n aks-store-demo
+          kubectl wait --for=condition=available --timeout=300s deployment/product-service -n aks-store-demo
+          kubectl wait --for=condition=available --timeout=300s deployment/order-service -n aks-store-demo
 
       - name: Get Service URLs
         run: |
           echo "=== AKS Store Demo Deployment Complete ==="
-          echo "Frontend URL:"
-          kubectl get service aks-store-demo-frontend -n aks-store-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+          echo "Store Front Service:"
+          kubectl get service store-front -n aks-store-demo -o wide
           echo ""
-          echo "Backend URL:"
-          kubectl get service aks-store-demo-backend -n aks-store-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+          echo "Product Service:"
+          kubectl get service product-service -n aks-store-demo -o wide
+          echo ""
+          echo "Order Service:"
+          kubectl get service order-service -n aks-store-demo -o wide
           echo ""
           echo "=== Pod Status ==="
           kubectl get pods -n aks-store-demo
