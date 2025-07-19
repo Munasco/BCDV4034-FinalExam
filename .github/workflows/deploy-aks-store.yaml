@@ -1,4 +1,4 @@
-name: Deploy AKS Store Demo (Managed Identity)
+name: Deploy AKS Store Demo
 
 on:
   push:
@@ -12,14 +12,9 @@ env:
   RESOURCE_GROUP: rg-aks-5q074gff
   NAMESPACE: aks-store-demo
 
-permissions:
-  id-token: write
-  contents: read
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: production
 
     steps:
       - name: Checkout code
@@ -30,8 +25,12 @@ jobs:
         with:
           version: "latest"
 
-      - name: Azure CLI Login
-        uses: azure/login@v1
+      - name: Azure CLI Login with PAT
+        run: |
+          az login --service-principal \
+            --username ${{ secrets.AZURE_CLIENT_ID }} \
+            --password ${{ secrets.AZURE_CLIENT_SECRET }} \
+            --tenant ${{ secrets.AZURE_TENANT_ID }}
 
       - name: Get AKS credentials
         run: |
