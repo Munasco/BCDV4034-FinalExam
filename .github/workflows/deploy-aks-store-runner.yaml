@@ -25,15 +25,20 @@ jobs:
 
       - name: Create AKS Cluster
         run: |
-          # Create AKS cluster if it doesn't exist
-          az aks create \
-            --resource-group ${{ env.RESOURCE_GROUP }} \
-            --name ${{ env.CLUSTER_NAME }} \
-            --node-count 1 \
-            --enable-addons monitoring \
-            --generate-ssh-keys \
-            --location ${{ env.LOCATION }} \
-            --yes
+          # Check if AKS cluster exists, create if it doesn't
+          if ! az aks show --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.CLUSTER_NAME }} --query name -o tsv 2>/dev/null; then
+            echo "Creating AKS cluster..."
+            az aks create \
+              --resource-group ${{ env.RESOURCE_GROUP }} \
+              --name ${{ env.CLUSTER_NAME }} \
+              --node-count 1 \
+              --enable-addons monitoring \
+              --generate-ssh-keys \
+              --location ${{ env.LOCATION }} \
+              --yes
+          else
+            echo "AKS cluster already exists, skipping creation..."
+          fi
 
       - name: Get AKS Credentials
         run: |
