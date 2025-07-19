@@ -52,8 +52,8 @@ jobs:
           # Create namespace first
           kubectl create namespace aks-store-demo --dry-run=client -o yaml | kubectl apply -f -
 
-          # Apply the store demo
-          kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/aks-store-demo/main/aks-store-quickstart.yaml
+          # Apply the store demo to the correct namespace
+          kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/aks-store-demo/main/aks-store-quickstart.yaml -n aks-store-demo
 
           # Wait a bit for resources to be created
           sleep 30
