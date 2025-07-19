@@ -1,0 +1,35 @@
+# Terraform Variables Configuration File - Example
+# Copy this file to terraform.tfvars and customize the values
+
+# Azure region where resources will be created
+# Available options: "East US", "West US 2", "Central US", "West Europe", etc.
+location = "East US"
+
+# Node pool configuration
+# Number of nodes in the default node pool (1-10)
+node_count = 2
+
+# VM size for the nodes
+# Common options: "Standard_D2s_v3", "Standard_D4s_v3", "Standard_B2s"
+vm_size = "Standard_D2s_v3"
+
+# Auto-scaling configuration
+enable_auto_scaling = true
+min_count          = 1
+max_count          = 3
+
+# Network plugin (azure or kubenet)
+# kubenet is more cost-effective, azure provides advanced networking
+network_plugin = "kubenet"
+
+# Enable Azure Policy add-on for governance
+enable_azure_policy = true
+
+# Resource tags for organization and cost tracking
+tags = {
+  Environment = "Development"
+  Project     = "AKS-Terraform"
+  ManagedBy   = "Terraform"
+  Owner       = "Your Team Name"
+  CostCenter  = "Your Cost Center"
+}
