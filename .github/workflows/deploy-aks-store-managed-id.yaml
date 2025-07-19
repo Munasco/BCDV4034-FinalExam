@@ -1,0 +1,54 @@
+name: Deploy AKS Store Demo - Managed Identity
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  RESOURCE_GROUP: rg-aks-store-demo
+  CLUSTER_NAME: aks-store-cluster
+  LOCATION: eastus
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure CLI Login with Managed Identity
+        uses: azure/login@v2
+        with:
+          client-id: "71037972-891a-48dd-a2a5-a7b50c2a0625"
+          tenant-id: "b5dc206c-17fd-4b06-8bc8-24f0bb650229"
+          subscription-id: "69a0ceb2-4ba6-4cd4-bbf7-a35a58b1be1e"
+
+      - name: Get AKS Credentials
+        run: |
+          az aks get-credentials \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --name ${{ env.CLUSTER_NAME }} \
+            --overwrite-existing
+
+      - name: Deploy AKS Store Demo
+        run: |
+          # Apply the store demo
+          kubectl apply -f https://raw.githubusercontent.com/Azure-Samples/aks-store-demo/main/aks-store-demo.yaml
+
+          # Wait for deployments to be ready
+          kubectl wait --for=condition=available --timeout=300s deployment/aks-store-demo-frontend -n aks-store-demo
+          kubectl wait --for=condition=available --timeout=300s deployment/aks-store-demo-backend -n aks-store-demo
+
+      - name: Get Service URLs
+        run: |
+          echo "=== AKS Store Demo Deployment Complete ==="
+          echo "Frontend URL:"
+          kubectl get service aks-store-demo-frontend -n aks-store-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+          echo ""
+          echo "Backend URL:"
+          kubectl get service aks-store-demo-backend -n aks-store-demo -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+          echo ""
+          echo "=== Pod Status ==="
+          kubectl get pods -n aks-store-demo
